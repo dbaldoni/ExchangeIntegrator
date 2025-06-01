@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syncbird - OAuth Configuration</title>
+    <link rel="stylesheet" href="account-setup.css">
+    <style>
+        .oauth-setup {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .warning-box {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 20px 0;
+        }
+        .step-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .step-number {
+            background: #0078d4;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .code-block {
+            background: #f5f5f5;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .form-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="oauth-setup">
+            <h1>OAuth2 Configuration</h1>
+            <p>To use Syncbird with Exchange/Office365, you need to configure OAuth2 authentication with Microsoft.</p>
+
+            <div class="warning-box">
+                <strong>Important:</strong> This configuration is required for production use. For testing purposes, you can use basic authentication if supported by your Exchange server.
+            </div>
+
+            <div class="step-section">
+                <h3><span class="step-number">1</span>Register Application with Microsoft</h3>
+                <p>You need to register Syncbird as an application in the Microsoft Azure Portal:</p>
+                <ol>
+                    <li>Go to <a href="https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank">Azure App Registrations</a></li>
+                    <li>Click "New registration"</li>
+                    <li>Enter a name like "Syncbird Thunderbird Extension"</li>
+                    <li>Set redirect URI to: <code class="code-block" id="redirect-uri">Loading...</code></li>
+                    <li>Click "Register"</li>
+                </ol>
+            </div>
+
+            <div class="step-section">
+                <h3><span class="step-number">2</span>Configure API Permissions</h3>
+                <p>Add the following API permissions to your registered application:</p>
+                <ul>
+                    <li><strong>Microsoft Graph:</strong>
+                        <ul>
+                            <li>Mail.ReadWrite</li>
+                            <li>Contacts.ReadWrite</li>
+                            <li>Calendars.ReadWrite</li>
+                            <li>offline_access</li>
+                        </ul>
+                    </li>
+                    <li><strong>Exchange:</strong>
+                        <ul>
+                            <li>EWS.AccessAsUser.All</li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>Don't forget to grant admin consent for these permissions.</p>
+            </div>
+
+            <div class="step-section">
+                <h3><span class="step-number">3</span>Enter Your Application Details</h3>
+                <div class="form-section">
+                    <form id="oauth-config-form">
+                        <div class="form-group">
+                            <label for="client-id">Application (Client) ID *</label>
+                            <input type="text" id="client-id" name="clientId" required 
+                                   placeholder="12345678-1234-1234-1234-123456789012">
+                            <small>Found in your Azure app registration overview page</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tenant-id">Directory (Tenant) ID</label>
+                            <input type="text" id="tenant-id" name="tenantId" 
+                                   placeholder="common" value="common">
+                            <small>Use "common" for multi-tenant, or your specific tenant ID</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Configuration</button>
+                            <button type="button" id="test-config" class="btn btn-outline">Test Configuration</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>Alternative: Basic Authentication</h4>
+                <p>If OAuth2 setup is not possible, Syncbird can fall back to basic authentication for on-premises Exchange servers that support it. However, OAuth2 is recommended for security and compatibility.</p>
+                <button type="button" id="skip-oauth" class="btn btn-secondary">Skip OAuth Setup</button>
+            </div>
+
+            <div id="status-message" class="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        class OAuthSetup {
+            constructor() {
+                this.init();
+            }
+
+            async init() {
+                await this.loadRedirectUri();
+                await this.loadExistingConfig();
+                this.setupEventListeners();
+            }
+
+            async loadRedirectUri() {
+                try {
+                    // Try to get the actual redirect URI from the extension context
+                    let redirectUri = 'moz-extension://[extension-id]/';
+                    
+                    if (typeof browser !== 'undefined' && browser.identity) {
+                        try {
+                            redirectUri = browser.identity.getRedirectURL();
+                        } catch (error) {
+                            console.warn('Could not get redirect URI:', error);
+                        }
+                    }
+                    
+                    document.getElementById('redirect-uri').textContent = redirectUri;
+                } catch (error) {
+                    console.error('Failed to load redirect URI:', error);
+                }
+            }
+
+            async loadExistingConfig() {
+                try {
+                    if (typeof browser !== 'undefined') {
+                        const response = await browser.runtime.sendMessage({
+                            action: 'getOAuthConfig'
+                        });
+
+                        if (response && response.success) {
+                            document.getElementById('client-id').value = response.config.clientId || '';
+                            document.getElementById('tenant-id').value = response.config.tenantId || 'common';
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Could not load existing config:', error);
+                }
+            }
+
+            setupEventListeners() {
+                document.getElementById('oauth-config-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveConfiguration();
+                });
+
+                document.getElementById('test-config').addEventListener('click', () => {
+                    this.testConfiguration();
+                });
+
+                document.getElementById('skip-oauth').addEventListener('click', () => {
+                    this.skipOAuthSetup();
+                });
+            }
+
+            async saveConfiguration() {
+                const clientId = document.getElementById('client-id').value.trim();
+                const tenantId = document.getElementById('tenant-id').value.trim() || 'common';
+
+                if (!clientId) {
+                    this.showStatus('Please enter a valid Client ID', 'error');
+                    return;
+                }
+
+                this.showStatus('Saving configuration...', 'info');
+
+                try {
+                    if (typeof browser !== 'undefined') {
+                        const response = await browser.runtime.sendMessage({
+                            action: 'saveOAuthConfig',
+                            data: { clientId, tenantId }
+                        });
+
+                        if (response && response.success) {
+                            this.showStatus('Configuration saved successfully!', 'success');
+                        } else {
+                            this.showStatus('Failed to save configuration: ' + (response.error || 'Unknown error'), 'error');
+                        }
+                    } else {
+                        // Fallback for testing
+                        this.showStatus('Configuration would be saved in extension context', 'info');
+                    }
+                } catch (error) {
+                    this.showStatus('Error saving configuration: ' + error.message, 'error');
+                }
+            }
+
+            async testConfiguration() {
+                const clientId = document.getElementById('client-id').value.trim();
+
+                if (!clientId) {
+                    this.showStatus('Please enter a Client ID first', 'error');
+                    return;
+                }
+
+                this.showStatus('Testing configuration...', 'info');
+
+                try {
+                    // Basic validation
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                    if (!uuidRegex.test(clientId)) {
+                        this.showStatus('Client ID should be in UUID format', 'error');
+                        return;
+                    }
+
+                    this.showStatus('Configuration format appears valid', 'success');
+                } catch (error) {
+                    this.showStatus('Error testing configuration: ' + error.message, 'error');
+                }
+            }
+
+            async skipOAuthSetup() {
+                this.showStatus('OAuth setup skipped. Basic authentication will be used when available.', 'info');
+                
+                // Redirect to account setup
+                setTimeout(() => {
+                    window.location.href = 'account-setup.html';
+                }, 2000);
+            }
+
+            showStatus(message, type = 'info') {
+                const statusDiv = document.getElementById('status-message');
+                statusDiv.className = `status-message ${type}`;
+                statusDiv.textContent = message;
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new OAuthSetup();
+        });
+    </script>
+</body>
+</html>

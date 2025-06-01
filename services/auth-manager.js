@@ -99,6 +99,15 @@ class AuthManager {
     console.log('Performing OAuth2 authentication for:', email);
 
     try {
+      // Check if OAuth is configured
+      const isConfigured = await this.isOAuthConfigured();
+      if (!isConfigured) {
+        throw new Error('OAuth2 is not configured. Please configure Microsoft application credentials in settings.');
+      }
+
+      // Get OAuth credentials from settings
+      const credentials = await this.getOAuthCredentials();
+      
       // Determine OAuth2 endpoints
       const endpoints = await this.getOAuth2Endpoints(serverSettings);
       
@@ -108,8 +117,8 @@ class AuthManager {
 
       // Start OAuth2 flow
       const authResult = await this.oauthFlow.startFlow({
-        clientId: this.clientId,
-        redirectUri: this.redirectUri,
+        clientId: credentials.clientId,
+        redirectUri: credentials.redirectUri,
         authorizationEndpoint: endpoints.authorizationEndpoint,
         tokenEndpoint: endpoints.tokenEndpoint,
         scope: endpoints.scope,

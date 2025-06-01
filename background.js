@@ -7,6 +7,7 @@ class ExchangeExtension {
   constructor() {
     this.accounts = new Map();
     this.syncIntervals = new Map();
+    this.settingsManager = new SettingsManager();
     this.authManager = new AuthManager();
     this.exchangeClient = new ExchangeClient();
     this.emailSync = new EmailSync();
@@ -76,6 +77,12 @@ class ExchangeExtension {
           
           case 'updateSyncSettings':
             return await this.updateSyncSettings(message.accountId, message.settings);
+          
+          case 'getOAuthConfig':
+            return await this.getOAuthConfig();
+          
+          case 'saveOAuthConfig':
+            return await this.saveOAuthConfig(message.data);
           
           default:
             console.warn('Unknown message action:', message.action);
@@ -338,6 +345,26 @@ class ExchangeExtension {
     if (this.syncIntervals.has(accountId)) {
       clearInterval(this.syncIntervals.get(accountId));
       this.syncIntervals.delete(accountId);
+    }
+  }
+
+  async getOAuthConfig() {
+    try {
+      const config = await this.settingsManager.getOAuthConfig();
+      return { success: true, config: config };
+    } catch (error) {
+      console.error('Failed to get OAuth config:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async saveOAuthConfig(data) {
+    try {
+      const result = await this.settingsManager.updateOAuthCredentials(data.clientId, data.tenantId);
+      return result;
+    } catch (error) {
+      console.error('Failed to save OAuth config:', error);
+      return { success: false, error: error.message };
     }
   }
 

@@ -186,6 +186,11 @@ class AccountSetupUI {
               Use server autodiscovery (recommended)
             </label>
           </div>
+
+          <div class="form-group">
+            <p><strong>Note:</strong> For Office365 accounts, OAuth2 configuration may be required.</p>
+            <a href="oauth-setup.html" target="_blank" class="btn btn-outline">Configure OAuth2</a>
+          </div>
         `;
 
       case 2:
