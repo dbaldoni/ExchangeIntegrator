@@ -9,6 +9,7 @@ class AuthManager {
     this.tokenCache = new Map(); // Cache for access tokens
     this.refreshTokens = new Map(); // Store refresh tokens
     this.tokenExpiryTimes = new Map(); // Track token expiry times
+    this.settingsManager = new SettingsManager();
     
     // OAuth2 endpoints for different Exchange environments
     this.authEndpoints = {
@@ -26,10 +27,41 @@ class AuthManager {
         scope: 'https://outlook.office365.com/EWS.AccessAsUser.All'
       }
     };
+  }
 
-    // Client ID for the application (would be registered with Microsoft)
-    this.clientId = process.env.MICROSOFT_CLIENT_ID || 'your-client-id-here';
-    this.redirectUri = browser.identity.getRedirectURL();
+  /**
+   * Get OAuth configuration from settings
+   */
+  async getOAuthCredentials() {
+    const oauthConfig = await this.settingsManager.getOAuthConfig();
+    return {
+      clientId: oauthConfig.clientId,
+      tenantId: oauthConfig.tenantId || 'common',
+      redirectUri: oauthConfig.redirectUri || this.getRedirectUri()
+    };
+  }
+
+  /**
+   * Get redirect URI for OAuth flow
+   */
+  getRedirectUri() {
+    try {
+      if (typeof browser !== 'undefined' && browser.identity && browser.identity.getRedirectURL) {
+        return browser.identity.getRedirectURL();
+      }
+      // Fallback for testing environment
+      return 'urn:ietf:wg:oauth:2.0:oob';
+    } catch (error) {
+      console.warn('Could not get redirect URI:', error);
+      return 'urn:ietf:wg:oauth:2.0:oob';
+    }
+  }
+
+  /**
+   * Check if OAuth is properly configured
+   */
+  async isOAuthConfigured() {
+    return await this.settingsManager.isOAuthConfigured();
   }
 
   /**

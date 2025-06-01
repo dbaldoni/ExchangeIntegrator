@@ -16,6 +16,7 @@
     "scripts": [
       "utils/xml-parser.js",
       "utils/oauth-flow.js",
+      "config/settings.js",
       "services/auth-manager.js",
       "api/ews-soap.js",
       "api/autodiscovery.js",
@@ -29,12 +30,6 @@
   },
 
   "permissions": [
-    "accountsRead",
-    "accountsIdentities",
-    "messagesRead",
-    "messagesModify",
-    "messagesMove",
-    "addressBooks",
     "storage",
     "tabs",
     "activeTab",
