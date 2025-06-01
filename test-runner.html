@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syncbird - Test Runner</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #0078d4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #106ebe;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        .extension-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🐦 Syncbird Test Runner</h1>
+        <p>Test suite per verificare il funzionamento dell'estensione Thunderbird</p>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Status dell'Estensione</h2>
+        <div id="extension-status" class="extension-status info">
+            <strong>Stato:</strong> Checking...
+        </div>
+        <button class="test-button" onclick="checkExtensionStatus()">Verifica Status</button>
+        <div id="status-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Test delle Funzionalità Core</h2>
+        <button class="test-button" onclick="testXMLParser()">Test XML Parser</button>
+        <button class="test-button" onclick="testAutodiscovery()">Test Autodiscovery</button>
+        <button class="test-button" onclick="testAuthentication()">Test Authentication</button>
+        <button class="test-button" onclick="testEWSClient()">Test EWS Client</button>
+        <div id="core-test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Test dell'Interfaccia Utente</h2>
+        <button class="test-button" onclick="openAccountSetup()">Apri Setup Account</button>
+        <button class="test-button" onclick="testFormValidation()">Test Validazione Form</button>
+        <div id="ui-test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖥️ Anteprima Interfaccia Setup</h2>
+        <iframe id="setup-iframe" src="/content/account-setup.html"></iframe>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Log di Sistema</h2>
+        <button class="test-button" onclick="clearLogs()">Pulisci Log</button>
+        <button class="test-button" onclick="exportLogs()">Esporta Log</button>
+        <div id="system-logs" style="max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 10px; margin-top: 10px; font-family: monospace; font-size: 12px;"></div>
+    </div>
+
+    <script>
+        // Simulate extension environment for testing
+        const mockBrowser = {
+            storage: {
+                local: {
+                    get: async (key) => ({ [key]: [] }),
+                    set: async (data) => console.log('Storage set:', data)
+                }
+            },
+            runtime: {
+                sendMessage: async (message) => {
+                    console.log('Message sent:', message);
+                    return { success: false, error: 'Extension context not available in browser test' };
+                }
+            }
+        };
+
+        // Make browser API available
+        if (typeof browser === 'undefined') {
+            window.browser = mockBrowser;
+        }
+
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push({ timestamp, message, type });
+            
+            const logsDiv = document.getElementById('system-logs');
+            const logElement = document.createElement('div');
+            logElement.textContent = logEntry;
+            logElement.style.color = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#333';
+            logsDiv.appendChild(logElement);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function showResult(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = message;
+            container.appendChild(resultDiv);
+        }
+
+        async function checkExtensionStatus() {
+            log('Verifica dello status dell\'estensione...');
+            
+            try {
+                // Check if core files are accessible
+                const coreFiles = [
+                    '/manifest.json',
+                    '/background.js',
+                    '/content/account-setup.html',
+                    '/api/exchange-client.js'
+                ];
+
+                let allFilesOk = true;
+                for (const file of coreFiles) {
+                    try {
+                        const response = await fetch(file);
+                        if (!response.ok) {
+                            allFilesOk = false;
+                            log(`File non accessibile: ${file}`, 'error');
+                        }
+                    } catch (error) {
+                        allFilesOk = false;
+                        log(`Errore caricamento ${file}: ${error.message}`, 'error');
+                    }
+                }
+
+                const statusDiv = document.getElementById('extension-status');
+                if (allFilesOk) {
+                    statusDiv.className = 'extension-status success';
+                    statusDiv.innerHTML = '<strong>Stato:</strong> ✅ Tutti i file core sono accessibili';
+                    showResult('status-results', '✅ Estensione pronta per il test', 'success');
+                    log('Status check completato con successo', 'success');
+                } else {
+                    statusDiv.className = 'extension-status error';
+                    statusDiv.innerHTML = '<strong>Stato:</strong> ❌ Alcuni file core non sono accessibili';
+                    showResult('status-results', '❌ Problemi rilevati nei file dell\'estensione', 'error');
+                    log('Status check fallito', 'error');
+                }
+            } catch (error) {
+                log(`Errore durante status check: ${error.message}`, 'error');
+                showResult('status-results', `❌ Errore: ${error.message}`, 'error');
+            }
+        }
+
+        async function testXMLParser() {
+            log('Test XML Parser...');
+            
+            try {
+                // Load and test XML parser
+                const response = await fetch('/utils/xml-parser.js');
+                const xmlParserCode = await response.text();
+                
+                // Execute the code to make XMLParser available
+                eval(xmlParserCode);
+                
+                const parser = new XMLParser();
+                const testXml = '<test><item>value</item></test>';
+                const doc = parser.parseXML(testXml);
+                
+                if (doc && doc.getElementsByTagName('item')[0].textContent === 'value') {
+                    showResult('core-test-results', '✅ XML Parser funziona correttamente', 'success');
+                    log('XML Parser test completato con successo', 'success');
+                } else {
+                    throw new Error('XML Parser non ha prodotto il risultato atteso');
+                }
+            } catch (error) {
+                showResult('core-test-results', `❌ XML Parser test fallito: ${error.message}`, 'error');
+                log(`XML Parser test fallito: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAutodiscovery() {
+            log('Test Autodiscovery...');
+            
+            try {
+                const response = await fetch('/api/autodiscovery.js');
+                const autodiscoveryCode = await response.text();
+                
+                // This would need XMLParser to be loaded first
+                await testXMLParser();
+                eval(autodiscoveryCode);
+                
+                const autodiscovery = new Autodiscovery();
+                const domain = autodiscovery.extractDomain('test@example.com');
+                
+                if (domain === 'example.com') {
+                    showResult('core-test-results', '✅ Autodiscovery domain extraction funziona', 'success');
+                    log('Autodiscovery test completato con successo', 'success');
+                } else {
+                    throw new Error('Domain extraction non ha funzionato correttamente');
+                }
+            } catch (error) {
+                showResult('core-test-results', `❌ Autodiscovery test fallito: ${error.message}`, 'error');
+                log(`Autodiscovery test fallito: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthentication() {
+            log('Test Authentication Manager...');
+            
+            try {
+                // Load OAuth flow first
+                const oauthResponse = await fetch('/utils/oauth-flow.js');
+                const oauthCode = await oauthResponse.text();
+                eval(oauthCode);
+                
+                const authResponse = await fetch('/services/auth-manager.js');
+                const authCode = await authResponse.text();
+                eval(authCode);
+                
+                const authManager = new AuthManager();
+                const isO365 = authManager.isOffice365({ serverUrl: 'outlook.office365.com' });
+                
+                if (isO365) {
+                    showResult('core-test-results', '✅ Authentication Manager rileva correttamente Office365', 'success');
+                    log('Authentication test completato con successo', 'success');
+                } else {
+                    throw new Error('Office365 detection non ha funzionato');
+                }
+            } catch (error) {
+                showResult('core-test-results', `❌ Authentication test fallito: ${error.message}`, 'error');
+                log(`Authentication test fallito: ${error.message}`, 'error');
+            }
+        }
+
+        async function testEWSClient() {
+            log('Test EWS Client...');
+            
+            try {
+                const response = await fetch('/api/ews-soap.js');
+                const ewsCode = await response.text();
+                
+                // Load XMLParser first
+                await testXMLParser();
+                eval(ewsCode);
+                
+                const ewsClient = new EWSClient();
+                
+                if (ewsClient && ewsClient.timeoutMs === 60000) {
+                    showResult('core-test-results', '✅ EWS Client inizializzato correttamente', 'success');
+                    log('EWS Client test completato con successo', 'success');
+                } else {
+                    throw new Error('EWS Client non inizializzato correttamente');
+                }
+            } catch (error) {
+                showResult('core-test-results', `❌ EWS Client test fallito: ${error.message}`, 'error');
+                log(`EWS Client test fallito: ${error.message}`, 'error');
+            }
+        }
+
+        function openAccountSetup() {
+            log('Apertura setup account...');
+            window.open('/content/account-setup.html', '_blank');
+            showResult('ui-test-results', '✅ Setup account aperto in nuova finestra', 'success');
+        }
+
+        function testFormValidation() {
+            log('Test validazione form...');
+            
+            // Test form validation logic
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const testEmails = [
+                { email: 'test@example.com', valid: true },
+                { email: 'invalid-email', valid: false },
+                { email: '', valid: false }
+            ];
+            
+            let allTestsPassed = true;
+            testEmails.forEach(test => {
+                const isValid = emailRegex.test(test.email);
+                if (isValid !== test.valid) {
+                    allTestsPassed = false;
+                    log(`Validazione fallita per: ${test.email}`, 'error');
+                }
+            });
+            
+            if (allTestsPassed) {
+                showResult('ui-test-results', '✅ Validazione email funziona correttamente', 'success');
+                log('Test validazione completato con successo', 'success');
+            } else {
+                showResult('ui-test-results', '❌ Problemi nella validazione email', 'error');
+            }
+        }
+
+        function clearLogs() {
+            logs = [];
+            document.getElementById('system-logs').innerHTML = '';
+            log('Log puliti');
+        }
+
+        function exportLogs() {
+            const logData = logs.map(log => `[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}`).join('\n');
+            const blob = new Blob([logData], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `syncbird-logs-${new Date().toISOString().slice(0, 19)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            log('Log esportati');
+        }
+
+        // Auto-run initial checks
+        window.onload = function() {
+            log('Syncbird Test Runner inizializzato');
+            setTimeout(checkExtensionStatus, 1000);
+        };
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /**
- * Background script for Exchange/Office365 Thunderbird extension
+ * Syncbird - Background script for Exchange/Office365 Thunderbird extension
  * Handles account management, synchronization coordination, and API communication
  */
 

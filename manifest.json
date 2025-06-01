@@ -1,14 +1,13 @@
 {
   "manifest_version": 2,
-  "name": "__MSG_extensionName__",
+  "name": "Syncbird",
   "version": "1.0.0",
-  "description": "__MSG_extensionDescription__",
-  "default_locale": "en",
-  "author": "Exchange Thunderbird Extension",
+  "description": "Exchange/Office365 integration for Thunderbird with OWA and server autodiscovery",
+  "author": "Syncbird Extension",
   
   "applications": {
     "gecko": {
-      "id": "exchange-thunderbird@extension.com",
+      "id": "syncbird@thunderbird.extension",
       "strict_min_version": "78.0"
     }
   },

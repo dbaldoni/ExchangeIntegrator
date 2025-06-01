@@ -105,7 +105,7 @@ class AccountSetupUI {
     const container = document.getElementById('main-container');
     container.innerHTML = `
       <div class="setup-container">
-        <h1>Add Exchange/Office365 Account</h1>
+        <h1>Syncbird - Add Exchange/Office365 Account</h1>
         
         <div class="step-indicator">
           <div class="step ${this.currentStep >= 1 ? 'active' : ''} ${this.currentStep > 1 ? 'completed' : ''}">
@@ -141,7 +141,7 @@ class AccountSetupUI {
     const container = document.getElementById('main-container');
     container.innerHTML = `
       <div class="account-list-container">
-        <h1>Exchange/Office365 Accounts</h1>
+        <h1>Syncbird - Exchange/Office365 Accounts</h1>
         
         <div class="account-list">
           ${this.accounts.map(account => this.renderAccountCard(account)).join('')}
