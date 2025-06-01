@@ -1,0 +1,32 @@
+{
+  "name": "syncbird",
+  "version": "1.0.0",
+  "description": "Exchange/Office365 integration for Thunderbird with OWA and server autodiscovery",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "python3 -m http.server 5000",
+    "lint": "echo \"Linting not configured yet\"",
+    "build": "echo \"Build process not configured yet\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/syncbird.git"
+  },
+  "keywords": [
+    "thunderbird",
+    "exchange",
+    "office365",
+    "email",
+    "sync",
+    "owa"
+  ],
+  "author": "Syncbird Extension",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/your-username/syncbird/issues"
+  },
+  "homepage": "https://github.com/your-username/syncbird#readme",
+  "devDependencies": {},
+  "dependencies": {}
+}
