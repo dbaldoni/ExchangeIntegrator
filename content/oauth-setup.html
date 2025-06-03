@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Syncbird – Impostazione OAuth2</title>
+  <title>Syncbird – OAuth2 Configuration</title>
   <style>
     body {
       font-family: sans-serif;
@@ -47,7 +47,7 @@
   </style>
 </head>
 <body>
-  <h2>Syncbird – Configurazione OAuth2</h2>
+  <h2>Syncbird – OAuth2 Configuration</h2>
   <form id="oauth-form">
     <label for="client-id">Client ID</label>
     <input type="text" id="client-id" name="clientId" required />
@@ -58,11 +58,11 @@
     <label for="client-secret">Client Secret</label>
     <input type="password" id="client-secret" name="clientSecret" required />
 
-    <button type="submit">Salva Credenziali</button>
+    <button type="submit">Save Credentials</button>
     <div id="message"></div>
   </form>
 
-  <!-- Qui colleghiamo lo script esterno (non inline) -->
+  <!-- Link to external script (not inline) -->
   <script src="oauth-setup.js"></script>
 </body>
 </html>
