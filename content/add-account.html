@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Syncbird – Add new Exchange account</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    label { display: block; margin-top: 1em; font-weight: bold; }
+    input, select { width: 100%; padding: 0.5em; margin-top: 0.3em; box-sizing: border-box; }
+    button { margin-top: 1.5em; padding: 0.7em 1.5em; }
+    #status { margin-top: 1em; font-size: 0.9em; }
+    #status.error { color: red; }
+    #status.success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>Add new Exchange account</h1>
+
+  <label for="name">Your name</label>
+  <input type="text" id="name" placeholder="John Doe" />
+
+  <label for="email">Your email address</label>
+  <input type="text" id="email" placeholder="you@company.com" />
+
+  <label for="username">Your username</label>
+  <input type="text" id="username" placeholder="DOMAIN\\Username or email" />
+
+  <label for="password">Your password</label>
+  <input type="password" id="password" placeholder="Password" />
+
+  <label for="protocol">Protocol</label>
+  <select id="protocol">
+    <option value="OWA">Outlook Web Access</option>
+    <option value="EWS">Exchange Web Services</option>
+    <option value="EAS">Exchange ActiveSync</option>
+  </select>
+
+  <label for="webmail">Webmail page / EWS endpoint</label>
+  <input type="text" id="webmail" placeholder="https://outlook.office365.com/owa/" />
+
+  <button id="createBtn">Create account</button>
+  <div id="status"></div>
+
+  <script src="add-account.js"></script>
+</body>
+</html>
+
