@@ -1,56 +1,32 @@
 {
   "manifest_version": 2,
   "name": "Syncbird",
+  "id": "syncbird@thunderbird.extension",
   "version": "1.0.0",
-  "description": "Exchange/Office365 integration for Thunderbird with OWA and server autodiscovery",
-  "author": "Syncbird Extension",
-  
+  "description": "Exchange/Office365 integration for Thunderbird via EWS Basic Auth",
+  "icons": {
+    "48": "icons/icon-48.png",
+    "64": "icons/icon-64.png"
+  },
+  "permissions": [
+    "accountsRead",
+    "messagesRead",
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "options_ui": {
+    "page": "content/add-account.html",
+    "open_in_tab": false
+  },
   "applications": {
     "gecko": {
-      "id": "syncbird@thunderbird.extension",
-      "strict_min_version": "78.0"
+      "id": "syncbird@thunderbird.extension"
     }
   },
-
-  "background": {
-    "scripts": [
-      "utils/xml-parser.js",
-      "utils/oauth-flow.js",
-      "config/settings.js",
-      "services/auth-manager.js",
-      "api/ews-soap.js",
-      "api/autodiscovery.js",
-      "api/exchange-client.js",
-      "services/email-sync.js",
-      "services/contact-sync.js",
-      "services/calendar-sync.js",
-      "background.js"
-    ],
-    "persistent": true
-  },
-
-  "permissions": [
-    "storage",
-    "tabs",
-    "activeTab",
-    "identity",
-    "https://*/*",
-    "http://*/*"
-  ],
-
-  "icons": {
-    "16": "icons/icon-16.svg",
-    "32": "icons/icon-32.svg",
-    "64": "icons/icon-64.svg"
-  },
-
-  "options_ui": {
-    "page": "content/account-setup.html",
-    "open_in_tab": true
-  },
-
-  "web_accessible_resources": [
-    "content/*",
-    "icons/*"
-  ]
+  "homepage_url": "https://github.com/dbaldoni/ExchangeIntegrator",
+  "author": "Your Name"
 }
+

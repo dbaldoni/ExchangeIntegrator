@@ -1,189 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syncbird - Development Server</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        h1 {
-            text-align: center;
-            font-size: 3em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-        .subtitle {
-            text-align: center;
-            font-size: 1.2em;
-            margin-bottom: 40px;
-            opacity: 0.9;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 24px;
-            margin: 20px 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-        }
-        .card h3 {
-            margin-top: 0;
-            color: white;
-            font-size: 1.4em;
-        }
-        .card p {
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.2s ease;
-            margin: 5px;
-            font-weight: 500;
-        }
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
-        .btn-primary {
-            background: #0078d4;
-            border-color: #0078d4;
-        }
-        .btn-primary:hover {
-            background: #106ebe;
-        }
-        .file-list {
-            list-style: none;
-            padding: 0;
-        }
-        .file-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .file-list li:last-child {
-            border-bottom: none;
-        }
-        .file-list a {
-            color: white;
-            text-decoration: none;
-            opacity: 0.9;
-        }
-        .file-list a:hover {
-            opacity: 1;
-        }
-        .status {
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            background: rgba(40, 167, 69, 0.2);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Syncbird – Exchange Integrator</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    h1 { margin-bottom: 0.5em; }
+    a.btn {
+      display: inline-block;
+      padding: 0.6em 1.2em;
+      margin-top: 1em;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+    a.btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🐦 Syncbird</h1>
-        <p class="subtitle">Exchange/Office365 Integration for Thunderbird</p>
-        
-        <div class="status">
-            <strong>Development Server Running</strong><br>
-            Extension files are being served for local testing
-        </div>
-
-        <div class="card">
-            <h3>🚀 Quick Start</h3>
-            <p>Choose an option to begin testing the Syncbird extension:</p>
-            <a href="/test-runner.html" class="btn btn-primary">Open Test Runner</a>
-            <a href="/content/account-setup.html" class="btn">Account Setup</a>
-            <a href="/content/oauth-setup.html" class="btn">OAuth Configuration</a>
-        </div>
-
-        <div class="card">
-            <h3>📁 Extension Files</h3>
-            <p>Direct access to extension components:</p>
-            <ul class="file-list">
-                <li><a href="/manifest.json">📄 manifest.json</a> - Extension manifest</li>
-                <li><a href="/background.js">⚙️ background.js</a> - Main background script</li>
-                <li><a href="/content/account-setup.html">🔧 account-setup.html</a> - Setup interface</li>
-                <li><a href="/api/exchange-client.js">🔌 exchange-client.js</a> - Exchange API client</li>
-                <li><a href="/api/autodiscovery.js">🔍 autodiscovery.js</a> - Server autodiscovery</li>
-                <li><a href="/services/auth-manager.js">🔐 auth-manager.js</a> - Authentication manager</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h3>🔧 Installation in Thunderbird</h3>
-            <p>To install this extension in Thunderbird for testing:</p>
-            <ol style="line-height: 1.8;">
-                <li>Open Thunderbird</li>
-                <li>Go to <strong>Tools</strong> → <strong>Add-ons and Themes</strong></li>
-                <li>Click the gear icon → <strong>Debug Add-ons</strong></li>
-                <li>Click <strong>Load Temporary Add-on</strong></li>
-                <li>Navigate to this directory and select <strong>manifest.json</strong></li>
-            </ol>
-        </div>
-
-        <div class="card">
-            <h3>📊 Features Overview</h3>
-            <ul style="line-height: 1.8;">
-                <li><strong>Server Autodiscovery</strong> - Automatic Exchange server detection</li>
-                <li><strong>OAuth2 Authentication</strong> - Modern auth for Office365</li>
-                <li><strong>Email Synchronization</strong> - Bidirectional email sync</li>
-                <li><strong>Contact Management</strong> - Sync contacts with Thunderbird</li>
-                <li><strong>Calendar Integration</strong> - Calendar event synchronization</li>
-                <li><strong>Real-time Updates</strong> - Background sync with configurable intervals</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <h3>📚 Documentation</h3>
-            <p>Additional resources and documentation:</p>
-            <a href="/README.md" class="btn">View README</a>
-            <a href="/LICENSE" class="btn">License</a>
-        </div>
-    </div>
-
-    <script>
-        // Simple status check
-        console.log('Syncbird development server loaded');
-        
-        // Check if we can access the manifest
-        fetch('/manifest.json')
-            .then(response => response.json())
-            .then(manifest => {
-                console.log('Extension manifest loaded:', manifest.name, manifest.version);
-            })
-            .catch(error => {
-                console.error('Could not load manifest:', error);
-            });
-    </script>
+  <h1>Syncbird – Exchange Integrator</h1>
+  <p>
+    Benvenuto in Syncbird, l’estensione per integrare Exchange/Office365 in Thunderbird con EWS Basic Auth.
+  </p>
+  <p>
+    Per creare un nuovo account Exchange, clicca sul pulsante qui sotto.
+  </p>
+  <a href="content/add-account.html" class="btn">Add new Exchange account</a>
 </body>
 </html>
+
